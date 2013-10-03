@@ -1,7 +1,6 @@
 # Create a clone of a source repo
 
-define git::clone ($title,
-                   $source,
+define git::clone ($source,
                    $branch = 'master') {
     include git
 
@@ -15,5 +14,5 @@ define git::clone ($title,
     } ->
     file {"$path/.git"}
 
-    git::defhooks::client {$path:}
+    git::defhook::client {$path:}
 }

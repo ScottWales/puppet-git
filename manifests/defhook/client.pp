@@ -7,5 +7,5 @@ define git::defhook::client {
 
     $hooks = prefix($hooknames,"$repo/.git/hooks")
 
-    git::defhook::def {$hooks}
+    git::defhook::def {$hooks:}
 }

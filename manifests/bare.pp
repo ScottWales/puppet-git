@@ -1,6 +1,6 @@
 # Create a bare git repo
 
-define git::bare ($title) {
+define git::bare {
     include git
 
     $path = $title
@@ -10,5 +10,5 @@ define git::bare ($title) {
         provider => git,
     }
 
-    git::defhooks::server {$path:}
+    git::defhook::server {$path:}
 }
