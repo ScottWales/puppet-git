@@ -14,8 +14,9 @@ Also allows for hook management using the define
 
     git::hook {$path: $hook, $content=undef, $source=undef}
 
-A new post-fetch hook is also supplied, it receives the list of changes from
-`git fetch` on stdin.
+Mirrors are set up with an intermediary repository which does a fetch of the
+source then a push to the real mirror. This means that you can use post-receive
+and post-update hooks on mirrors.
 
 Examples
 --------

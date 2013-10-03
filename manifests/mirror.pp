@@ -1,10 +1,16 @@
 # Mirror a git repository, keeping it up to date
-define git::mirror ($source) {
+#
+# This uses two repositories in order for hooks to work, since git can't hook
+# on a remote update. 'fetcher' pulls from the remote repo and then pushes to
+# the true mirror repo. (of course the mirror can't reject commits, else things
+# get weird)
+
+define git::mirror ($source, $fetcher = "${title}-fetcher") {
     include git
 
-    $path = $title
+    $mirror = $title
     
-    vcsrepo {$path:
+    vcsrepo {$fetcher:
         ensure => bare,
         provider => git,
     } ->
@@ -13,23 +19,33 @@ define git::mirror ($source) {
     # [remote "origin"]
     #   fetch = +refs/*:refs/*
     #   mirror = true
-    augeas {$path:
-        context => "/files$path/config",
+    #   url = $source
+    # [remote "mirror"]
+    #   mirror = true
+    #   url = $mirror
+    augeas {$fetcher:
+        context => "/files$fetcher/config",
         lens => "Puppet.lns",
-        incl => "$path/config",
+        incl => "$fetcher/config",
         changes => ["set 'remote \"origin\"/fetch' '+refs/*:refs/*'",
                     "set 'remote \"origin\"/mirror' 'true'",
-                    "set 'remote \"origin\"/url' '$source'"],
+                    "set 'remote \"origin\"/url' '$source'",
+                    "set 'remote \"mirror\"/mirror' 'true'",
+                    "set 'remote \"mirror\"/url' '$mirror'"],
+    }
+
+    vcsrepo {$mirror:
+        ensure => bare,
+        provider => git,
     }
     
     # Update every 10 min
-    # Also adds a post-fetch hook for updating trac etc.
-    cron {"update-$path":
-        command => "cd $path && git fetch | [ -f $path/hooks/post-fetch] && grep '->' | $path/hooks/post-fetch",
+    cron {"update-$mirror":
+        command => "cd $fetcher && git remote update && git push mirror",
         user => root,
         minute => '*/10',
-        require => Vcsrepo[$path],
+        require => Vcsrepo[$mirror, $fetcher],
     }
 
-    git::defhook::server {$path:}
+    git::defhook::mirror {$mirror:}
 }

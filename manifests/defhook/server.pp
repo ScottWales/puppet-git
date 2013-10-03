@@ -3,7 +3,7 @@
 define git::defhook::server {
     $repo = $title
 
-    $hooknames = ['pre-receive','post-receive','update','post-fetch']
+    $hooknames = ['pre-receive','post-receive','update']
 
     $hooks = prefix($hooknames,"$repo/hooks/")
 
