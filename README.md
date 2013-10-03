@@ -14,6 +14,23 @@ Also allows for hook management using the define
 
     git::hook {$path: $hook, $content=undef, $source=undef}
 
+Examples
+--------
+
+    git::bare {'/git/repo':}
+    git::hook {'/git/repo':
+        hook => 'post-commit',
+        source => '/git/repo/hooks/post-commit.sample',
+    }
+
+    git::clone {'/git/clone':
+        source => 'https://github.com/ScottWales/puppet-git',
+    }
+    git::hook {'/git/clone/.git':
+        hook => 'post-commit',
+        content => 'echo "Thanks for the commit!"',
+    }
+
 Requires:
 ---------
  * https://github.com/puppetlabs/puppetlabs-vcsrepo
