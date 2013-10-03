@@ -14,6 +14,9 @@ Also allows for hook management using the define
 
     git::hook {$path: $hook, $content=undef, $source=undef}
 
+A new post-fetch hook is also supplied, it receives the list of changes from
+`git fetch` on stdin.
+
 Examples
 --------
 

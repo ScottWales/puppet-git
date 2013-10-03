@@ -20,17 +20,12 @@ define git::mirror ($source) {
         changes => ["set 'remote \"origin\"/fetch' '+refs/*:refs/*'",
                     "set 'remote \"origin\"/mirror' 'true'",
                     "set 'remote \"origin\"/url' '$source'"],
-    } ~>
-    
-    exec {"git fetch $path":
-        command => "/usr/bin/git fetch",
-        cwd => "$path",
-        refreshonly => true,
     }
-
+    
     # Update every 10 min
+    # Also adds a post-fetch hook for updating trac etc.
     cron {"update-$path":
-        command => "cd $path && git fetch",
+        command => "cd $path && git fetch | [ -f $path/hooks/post-fetch] && grep '->' | $path/hooks/post-fetch",
         user => root,
         minute => '*/10',
         require => Vcsrepo[$path],
