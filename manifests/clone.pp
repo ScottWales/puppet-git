@@ -12,7 +12,7 @@ define git::clone ($source,
         source => $source,
         revision => $branch,
     } ->
-    file {"$path/.git"}
+    file {"$path/.git":}
 
     git::defhook::client {$path:}
 }
