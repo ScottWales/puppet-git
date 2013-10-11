@@ -18,6 +18,8 @@ Mirrors are set up with an intermediary repository which does a fetch of the
 source then a push to the real mirror. This means that you can use post-receive
 and post-update hooks on mirrors.
 
+The cron job requires cronic to be available - http://habilis.net/cronic/
+
 Examples
 --------
 

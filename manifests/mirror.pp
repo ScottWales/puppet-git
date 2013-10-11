@@ -9,7 +9,7 @@ define git::mirror ($source, $fetcher = "${title}-fetcher") {
     include git
 
     $mirror = $title
-    
+
     vcsrepo {$fetcher:
         ensure => bare,
         provider => git,
@@ -38,10 +38,10 @@ define git::mirror ($source, $fetcher = "${title}-fetcher") {
         ensure => bare,
         provider => git,
     }
-    
+
     # Update every 10 min
     cron {"update-$mirror":
-        command => "cd $fetcher && git remote update >/dev/null && git push mirror >/dev/null",
+        command => "cd $fetcher && cronic git remote update && cronic git push mirror",
         user    => root,
         minute  => '*/10',
         require => Vcsrepo[$mirror, $fetcher],
