@@ -41,9 +41,9 @@ define git::mirror ($source, $fetcher = "${title}-fetcher") {
     
     # Update every 10 min
     cron {"update-$mirror":
-        command => "cd $fetcher && git remote update && git push mirror",
-        user => root,
-        minute => '*/10',
+        command => "cd $fetcher && git remote update >/dev/null && git push mirror >/dev/null",
+        user    => root,
+        minute  => '*/10',
         require => Vcsrepo[$mirror, $fetcher],
     }
 
