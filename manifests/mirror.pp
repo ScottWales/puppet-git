@@ -5,15 +5,22 @@
 # the true mirror repo. (of course the mirror can't reject commits, else things
 # get weird)
 
-define git::mirror ($source, $fetcher = "${title}-fetcher") {
+define git::mirror (
+  $source,
+  $fetcher = "${title}-fetcher",
+  $user    = 'root',
+  $group   = 'root',
+) {
     include git
 
     $mirror = $title
 
     vcsrepo {$fetcher:
-        ensure => bare,
+        ensure   => bare,
         provider => git,
-    } ->
+        owner    => $user,
+        group    => $group,
+    }
 
     # Need to add to $repo/config:
     # [remote "origin"]
@@ -24,25 +31,28 @@ define git::mirror ($source, $fetcher = "${title}-fetcher") {
     #   mirror = true
     #   url = $mirror
     augeas {$fetcher:
-        context => "/files$fetcher/config",
-        lens => "Puppet.lns",
-        incl => "$fetcher/config",
+        context => "/files${fetcher}/config",
+        lens    => 'Puppet.lns',
+        incl    => "${fetcher}/config",
         changes => ["set 'remote \"origin\"/fetch' '+refs/*:refs/*'",
                     "set 'remote \"origin\"/mirror' 'true'",
-                    "set 'remote \"origin\"/url' '$source'",
+                    "set 'remote \"origin\"/url' '${source}'",
                     "set 'remote \"mirror\"/mirror' 'true'",
-                    "set 'remote \"mirror\"/url' '$mirror'"],
+                    "set 'remote \"mirror\"/url' '${mirror}'"],
+        require => Vcsrepo[$fetcher],
     }
 
     vcsrepo {$mirror:
-        ensure => bare,
+        ensure   => bare,
         provider => git,
+        owner    => $user,
+        group    => $group,
     }
 
     # Update every 10 min
-    cron {"update-$mirror":
-        command => "cd $fetcher && git remote update &>/dev/null && git push mirror &>/dev/null",
-        user    => root,
+    cron {"update-${mirror}":
+        command => "cd ${fetcher} && git remote update &>/dev/null && git push mirror &>/dev/null",
+        user    => $user,
         minute  => '*/10',
         require => Vcsrepo[$mirror, $fetcher],
     }
